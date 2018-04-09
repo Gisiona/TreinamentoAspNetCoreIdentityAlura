@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Owin;
 using System.Data.Entity;
+using TreinamentoAspNetCoreIdentityAlura.App_Start.Identity;
 using TreinamentoAspNetCoreIdentityAlura.Models;
 
 [assembly: OwinStartup(typeof(TreinamentoAspNetCoreIdentityAlura.Startup))]
@@ -27,7 +28,25 @@ namespace TreinamentoAspNetCoreIdentityAlura
                 (opcoes, contextoOwin) =>
                 {
                     var userStore = contextoOwin.Get <IUserStore<UsuarioAplicacao>>();
-                    return new UserManager<UsuarioAplicacao>(userStore);
+                    var userManager =new UserManager<UsuarioAplicacao>(userStore);
+
+                    //adicionado validacoes do usuario atraves do Owin
+                    var userValidator = new UserValidator<UsuarioAplicacao>(userManager);
+
+                    userValidator.RequireUniqueEmail = true; //nao permite cadastro com emails duplicados
+
+                    //Adiciona ao user manager as validacoes do usuário
+                    userManager.UserValidator = userValidator;
+
+                    //Adiciona validacao da senha
+                    userManager.PasswordValidator = new ValidadorSenha()
+                    {
+                        TamanhoSenhaRequerido = 6,
+                        ObrigatorioCaracteresEspecias = true
+                    };
+
+
+                    return userManager;
                 });
         }
     }

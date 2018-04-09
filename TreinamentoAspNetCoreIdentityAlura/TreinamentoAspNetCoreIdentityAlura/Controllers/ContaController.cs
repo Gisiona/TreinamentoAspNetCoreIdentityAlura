@@ -55,12 +55,25 @@ namespace TreinamentoAspNetCoreIdentityAlura.Controllers
                 novoUsuario.UserName = conta.NomeUsuario;
                 novoUsuario.NomeCompleto = conta.NomeCompleto;
 
-                await UserManager.CreateAsync(novoUsuario, conta.Senha);
+                var usuarioBanco = UserManager.FindByEmail(conta.Email);
+
+                if(usuarioBanco != null)
+                {
+                    return RedirectToAction("index", "home");
+                }
+                    
+
+                var resultado = await UserManager.CreateAsync(novoUsuario, conta.Senha);
+                if(resultado.Succeeded)
+                {
+                    // redireciona para pagina inicial
+                    return RedirectToAction("index", "home");
+                }
+
                 //_context.Users.Add(novoUsuario);
                 //_context.SaveChanges();
 
-                // redireciona para pagina inicial
-                return RedirectToAction("index", "home");
+                
             }
             return View();
         }
